@@ -17,12 +17,15 @@ const ActionType = {
 exports.name = 'SMS';
 function invoke(opts, tcb) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { action, phone, smsCode } = opts;
+        const { action, phone, smsCode, app } = opts;
         if (!action || !ActionType[action]) {
             throw new Error('[@cloudbase/extension-sms] action必须为正确的值');
         }
         let functionData = {};
         if (action === 'Login') {
+            if (!app) {
+                throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值');
+            }
             functionData = {
                 cmd: ActionType[action],
                 phone,
@@ -40,7 +43,11 @@ function invoke(opts, tcb) {
             data: functionData
         });
         if (action === 'Login' && smsRes.code === 'LOGIN_SUCCESS') {
-            return smsRes.res;
+            const auth = app.auth({ persistence: 'local' });
+            yield auth
+                .customAuthProvider()
+                .signIn(smsRes.res);
+            return;
         }
         if (action === 'Send' && smsRes.code === 'SEND_SUCCESS') {
             return;

@@ -8,13 +8,16 @@ const ActionType = {
 export const name = 'SMS'
 
 export async function invoke(opts, tcb) {
-    const { action, phone, smsCode } = opts
+    const { action, phone, smsCode, app } = opts
     if (!action || !ActionType[action]) {
         throw new Error('[@cloudbase/extension-sms] action必须为正确的值')
     }
 
     let functionData = {}
     if (action === 'Login') {
+        if (!app) {
+            throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值')
+        }
         functionData = {
             cmd: ActionType[action],
             phone,
@@ -33,7 +36,11 @@ export async function invoke(opts, tcb) {
     })
 
     if (action === 'Login' && smsRes.code === 'LOGIN_SUCCESS') {
-        return smsRes.res
+        const auth = app.auth({ persistence: 'local'})
+        await auth
+            .customAuthProvider()
+            .signIn(smsRes.res)
+        return
     }
 
     if (action === 'Send' && smsRes.code === 'SEND_SUCCESS') {
