@@ -67,9 +67,9 @@ function callFunction(tcb, options) {
         }
         if (smsRes.code) {
             if (smsRes.message && smsRes.message.indexOf('找不到对应的FunctionName') > -1) {
-                throw new Error('[@cloudbase/extension-ci] 请确认扩展已安装');
+                throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装');
             }
-            throw new Error(`[@cloudbase/extension-ci] 调用扩展函数失败 ;  ${smsRes.requestId ? smsRes.requestId : ''} ; ${smsRes.code} ; ${smsRes.message}`);
+            throw new Error(`[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${smsRes.requestId ? smsRes.requestId : ''} ; ${smsRes.code} ; ${smsRes.message}`);
         }
         return smsRes.result;
     });
