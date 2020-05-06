@@ -1,5 +1,4 @@
 const path = require('path')
-const pkgJson = require('./package.json')
 
 module.exports = {
     entry: './src/index.ts',
@@ -13,8 +12,8 @@ module.exports = {
         ]
     },
     output: {
-        filename: 'extension-sms.js',
-        path: path.resolve(__dirname, 'built', pkgJson.version),
+        filename: 'index.umd.js',
+        path: path.resolve(__dirname, 'built'),
         library: "extSms",
         libraryTarget: "umd"
     }
