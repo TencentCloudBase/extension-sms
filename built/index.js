@@ -67,9 +67,6 @@ function callFunction(tcb, options) {
             if (err.message && err.message.indexOf('找不到对应的FunctionName') > -1) {
                 throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装');
             }
-            if (err.errMsg && err.errMsg.indexOf('找不到对应的FunctionName') > -1) {
-                errMessage = '[@cloudbase/extension-sms] 请确认扩展已安装';
-            }
             throw new Error(errMessage);
         }
         if (smsRes.code) {

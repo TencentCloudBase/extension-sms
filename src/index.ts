@@ -60,11 +60,6 @@ async function callFunction(tcb, options) {
             throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装')
         }
 
-        // 兼容小程序sdk
-        if (err.errMsg && err.errMsg.indexOf('找不到对应的FunctionName') > -1) {
-            errMessage = '[@cloudbase/extension-sms] 请确认扩展已安装'
-        }
-
         throw new Error(errMessage)
     }
 
