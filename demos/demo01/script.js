@@ -9,7 +9,7 @@ main()
 async function main() {
     const loginState = app.auth().hasLoginState()
     if (loginState && !loginState.isAnonymous) {
-        return console.log('🚧目前已正式登陆，请清空本地缓存数据，刷新页面')
+        return console.log('🚧目前已正式登录，请清空本地缓存数据，刷新页面')
     }
     await loginAnonymously()
     await loginWithSms()
@@ -49,7 +49,7 @@ async function loginWithSms() {
     console.log('✅登录成功')
     
     const loginState = await app.auth().getLoginState()
-    console.log('📌是否为匿名登录:', loginState.isAnonymous) // true
+    console.log('📌是否为匿名登录:', loginState.isAnonymous) // false
 }
 
 /**
