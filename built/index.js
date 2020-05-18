@@ -8,24 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const functionName = 'tcb-sms-auth';
+const axios_1 = __importDefault(require("axios"));
+const httpPath = '/tcb-ext-sms';
 const ActionType = {
     Login: 'login',
     Send: 'send'
 };
 exports.name = 'SMS';
-function invoke(opts, tcb) {
+function invoke(opts) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { action, phone, smsCode, app } = opts;
+        const { action, phone, smsCode, app, customDomain } = opts;
         if (!action || !ActionType[action]) {
             throw new Error('[@cloudbase/extension-sms] action必须为正确的值');
         }
+        if (!app) {
+            throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值');
+        }
+        const url = customDomain ? `${customDomain}${httpPath}` : `https://${app.config.env}.service.tcloudbase.com${httpPath}`;
         let functionData = {};
         if (action === 'Login') {
-            if (!app) {
-                throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值');
-            }
             functionData = {
                 cmd: ActionType[action],
                 phone,
@@ -38,10 +43,15 @@ function invoke(opts, tcb) {
                 phone
             };
         }
-        const smsRes = yield callFunction(tcb, {
-            name: functionName,
-            data: functionData
-        });
+        const axiosOptions = {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'post',
+            url,
+            data: JSON.stringify(functionData)
+        };
+        const smsRes = yield callFunction(axiosOptions);
         if (action === 'Login' && smsRes.code === 'LOGIN_SUCCESS') {
             const auth = app.auth({ persistence: 'local' });
             yield auth
@@ -56,25 +66,14 @@ function invoke(opts, tcb) {
     });
 }
 exports.invoke = invoke;
-function callFunction(tcb, options) {
+function callFunction(options) {
     return __awaiter(this, void 0, void 0, function* () {
-        let smsRes;
         try {
-            smsRes = yield tcb.callFunction(options);
+            const smsRes = yield axios_1.default(options);
+            return smsRes.data;
         }
         catch (err) {
-            let errMessage = `[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${err.code ? err.code : ''} ${err.message ? err.message : ''}`;
-            if (err.message && err.message.indexOf('找不到对应的FunctionName') > -1) {
-                throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装');
-            }
-            throw new Error(errMessage);
+            throw new Error(`[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${err.message}`);
         }
-        if (smsRes.code) {
-            if (smsRes.message && smsRes.message.indexOf('找不到对应的FunctionName') > -1) {
-                throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装');
-            }
-            throw new Error(`[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${smsRes.requestId ? smsRes.requestId : ''} ; ${smsRes.code} ; ${smsRes.message}`);
-        }
-        return smsRes.result;
     });
 }

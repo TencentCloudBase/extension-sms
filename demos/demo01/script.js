@@ -33,6 +33,7 @@ async function loginWithSms() {
     const phone = window.prompt("请输入您的手机号，将发送验证码到您的手机", "")
     await tcb.invokeExtension(extSms.name, {
         action: 'Send',
+        app,
         phone
     })
 
