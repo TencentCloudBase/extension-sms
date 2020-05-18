@@ -1,6 +1,6 @@
 {
     "name": "@cloudbase/extension-sms",
-    "version": "0.0.1-beta.2",
+    "version": "0.0.1-beta.3",
     "description": "",
     "main": "built/index.js",
     "scripts": {
@@ -17,6 +17,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "axios": "^0.19.2",
         "fast-xml-parser": "^3.16.0",
         "js-base64": "^2.5.2"
     },

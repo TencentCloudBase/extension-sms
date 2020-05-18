@@ -34,8 +34,9 @@ const res = await tcb.invokeExtension('CloudInfinite',opts)
 |--| -- | -- | -- |
 | action | String | 是 | 操作类型，支持 Send 和 Login |
 | phone | String | 是 | 电话号码 | 
+| app | Tcb | 是 | tcb实例 |
 | smsCode | String | 否 | 短信验证码，action 为 Login 时需要传入 |
-| app | Tcb | 否 | tcb实例，action 为 Login 时需要传入 |
+| customDomain | String | 否 | HTTP触发的自定义域名 |
 
 `action`目前包含以下类型
 
@@ -47,8 +48,13 @@ const res = await tcb.invokeExtension('CloudInfinite',opts)
 #### 发送短信验证码
 
 ```javascript
+const app = tcb.init({
+    env: '您的环境ID'
+});
+
 const opts = {
     action: 'Send',
+    app,
     phone: '' // 用户输入的手机号
 };
 
@@ -71,9 +77,9 @@ const app = tcb.init({
 
 const opts = {
     action: 'Login',
+    app,
     phone: '', // 用户手机号
     smsCode: '', // 接收到的短信验证码
-    app
 }
 
 try {

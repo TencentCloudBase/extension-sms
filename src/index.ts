@@ -1,4 +1,6 @@
-const functionName = 'tcb-sms-auth'
+import axios from 'axios'
+
+const httpPath = '/tcb-ext-sms'
 
 const ActionType = {
     Login: 'login',
@@ -7,17 +9,23 @@ const ActionType = {
 
 export const name = 'SMS'
 
-export async function invoke(opts, tcb) {
-    const { action, phone, smsCode, app } = opts
+export async function invoke(opts) {
+    const { action, phone, smsCode, app, customDomain } = opts
     if (!action || !ActionType[action]) {
         throw new Error('[@cloudbase/extension-sms] action必须为正确的值')
     }
 
+    // tcb实例：
+    //  1. 读取config中的envid
+    //  2. 在sdk内部进行登录
+    if (!app) {
+        throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值')
+    }
+
+    const url = customDomain ? `${customDomain}${httpPath}` : `https://${app.config.env}.service.tcloudbase.com${httpPath}`
+
     let functionData = {}
     if (action === 'Login') {
-        if (!app) {
-            throw new Error('[@cloudbase/extension-sms] app必须为tcb.init(...)的返回值')
-        }
         functionData = {
             cmd: ActionType[action],
             phone,
@@ -30,10 +38,16 @@ export async function invoke(opts, tcb) {
         }
     }
 
-    const smsRes = await callFunction(tcb, {
-        name: functionName,
-        data: functionData
-    })
+    const axiosOptions = {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        url,
+        data: JSON.stringify(functionData)
+    }
+
+    const smsRes = await callFunction(axiosOptions)
 
     if (action === 'Login' && smsRes.code === 'LOGIN_SUCCESS') {
         const auth = app.auth({ persistence: 'local'})
@@ -50,26 +64,11 @@ export async function invoke(opts, tcb) {
     throw new Error(`[@cloudbase/extension-sms] ${smsRes.msg}`)    
 }
 
-async function callFunction(tcb, options) {
-    let smsRes
+async function callFunction(options) {
     try {
-        smsRes = await tcb.callFunction(options)
+        const smsRes = await axios(options)
+        return smsRes.data
     } catch (err) {
-        let errMessage = `[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${err.code ? err.code : ''} ${err.message ? err.message : ''}`
-        if (err.message && err.message.indexOf('找不到对应的FunctionName') > -1) {
-            throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装')
-        }
-
-        throw new Error(errMessage)
+        throw new Error(`[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${err.message}`)
     }
-
-    if (smsRes.code) {
-        if (smsRes.message && smsRes.message.indexOf('找不到对应的FunctionName') > -1) {
-            throw new Error('[@cloudbase/extension-sms] 请确认扩展已安装')
-        }
-
-        throw new Error(`[@cloudbase/extension-sms] 调用扩展函数失败 ;  ${smsRes.requestId ? smsRes.requestId : ''} ; ${smsRes.code} ; ${smsRes.message}`)
-    }
-    
-    return smsRes.result
 }
