@@ -5,7 +5,7 @@
 方法1: 使用npm：
 
 ```
-npm install --save @cloudbase/extension-sms@latest
+npm install --save @cloudbase/extension-sms
 ```
 
 方法2: 使用CDN
