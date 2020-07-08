@@ -32,15 +32,16 @@ const res = await tcb.invokeExtension('CloudInfinite',opts)
 
 |名称	|类型	| 是否必须	| 说明 |
 |--| -- | -- | -- |
-| action | String | 是 | 操作类型，支持 Send 和 Login |
+| action | String | 是 | 操作类型，支持 `Send`, `Login`, `Verify` |
 | phone | String | 是 | 电话号码 | 
 | app | Tcb | 是 | tcb实例 |
-| smsCode | String | 否 | 短信验证码，action 为 Login 时需要传入 |
+| smsCode | String | 否 | 短信验证码，action 为 `Login` 或 `Verify` 时需要传入 |
 | customDomain | String | 否 | HTTP触发的自定义域名 |
 
 `action`目前包含以下类型
 
 - Send: 发送短信验证码
+- Verify: 校验短信验证码
 - Login: 短信验证码登录
 
 ## 功能说明
@@ -68,6 +69,28 @@ try {
 
 **注意**：前往[短信服务(SMS)](https://console.cloud.tencent.com/smsv2/app-setting)，调整短信发送频率配置
 
+#### 校验短信验证码
+
+```javascript
+const app = tcb.init({
+    env: '您的环境ID'
+});
+
+const opts = {
+    action: 'Verify',
+    app,
+    phone: '', // 用户手机号
+    smsCode: '', // 需要校验的验证码
+};
+
+try {
+    await tcb.invokeExtension(extSms.name, opts); // 校验短信验证码
+    console.log('短信验证码校验成功')
+} catch (error) {
+    console.log('短信验证码校验失败', error.message)
+}
+```
+
 #### 短信验证码登录
 
 ```javascript
@@ -89,3 +112,5 @@ try {
     console.log('登录失败：', error.message)
 }
 ```
+
+**注意**：登录成功后，验证码自动失效。

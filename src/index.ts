@@ -4,7 +4,8 @@ const httpPath = '/tcb-ext-sms'
 
 const ActionType = {
     Login: 'login',
-    Send: 'send'
+    Send: 'send',
+    Verify: 'verify'
 }
 
 export const name = 'SMS'
@@ -36,6 +37,12 @@ export async function invoke(opts) {
             cmd: ActionType[action],
             phone
         }
+    } else if (action === 'Verify') {
+        functionData = {
+            cmd: ActionType[action],
+            phone,
+            smsCode
+        }
     }
 
     const axiosOptions = {
@@ -58,6 +65,10 @@ export async function invoke(opts) {
     }
 
     if (action === 'Send' && smsRes.code === 'SEND_SUCCESS') {
+        return
+    }
+
+    if (action === 'Verify' && smsRes.code === 'SMS_CODE_IS_VALID') {
         return
     }
 

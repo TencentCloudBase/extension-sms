@@ -11,7 +11,7 @@ async function main() {
     if (loginState && !loginState.isAnonymous) {
         return console.log('🚧目前已正式登录，请清空本地缓存数据，刷新页面')
     }
-    await loginAnonymously()
+    // await loginAnonymously()
     await loginWithSms()
 }
 
@@ -41,6 +41,20 @@ async function loginWithSms() {
     await sleep(1000) // 等待接受验证码
 
     const smsCode = window.prompt('请输入接受到的验证码', '')
+
+    try {
+        await tcb.invokeExtension(extSms.name, {
+            action: 'Verify',
+            app,
+            phone,
+            smsCode
+        })
+        console.log('✅短信验证码校验成功')
+    } catch (error) {
+        console.log('❎短信验证码校验失败', error.message)
+        return
+    }
+    
     await tcb.invokeExtension(extSms.name, {
         action: 'Login',
         app,
@@ -48,9 +62,30 @@ async function loginWithSms() {
         smsCode
     })
     console.log('✅登录成功')
-    
-    const loginState = await app.auth().getLoginState()
-    console.log('📌是否为匿名登录:', loginState.isAnonymous) // false
+
+    try {
+        await tcb.invokeExtension(extSms.name, {
+            action: 'Verify',
+            app,
+            phone,
+            smsCode
+        })
+        console.log('❎第二次验证码校验成功，不符合预期')
+    } catch (error) {
+        console.log('✅第二次验证码校验失败，符合预期')
+    }
+
+    try {
+        await tcb.invokeExtension(extSms.name, {
+            action: 'Login',
+            app,
+            phone,
+            smsCode
+        })
+        console.log('❎使用后的验证码再次使用，登录成功，不符合预期')
+    } catch (error) {
+        console.log('✅使用后的验证码再次使用，登录失败，符合预期')
+    }
 }
 
 /**

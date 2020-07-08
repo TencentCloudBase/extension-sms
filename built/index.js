@@ -16,7 +16,8 @@ const axios_1 = __importDefault(require("axios"));
 const httpPath = '/tcb-ext-sms';
 const ActionType = {
     Login: 'login',
-    Send: 'send'
+    Send: 'send',
+    Verify: 'verify'
 };
 exports.name = 'SMS';
 function invoke(opts) {
@@ -43,6 +44,13 @@ function invoke(opts) {
                 phone
             };
         }
+        else if (action === 'Verify') {
+            functionData = {
+                cmd: ActionType[action],
+                phone,
+                smsCode
+            };
+        }
         const axiosOptions = {
             headers: {
                 'Content-Type': 'application/json'
@@ -60,6 +68,9 @@ function invoke(opts) {
             return;
         }
         if (action === 'Send' && smsRes.code === 'SEND_SUCCESS') {
+            return;
+        }
+        if (action === 'Verify' && smsRes.code === 'SMS_CODE_IS_VALID') {
             return;
         }
         throw new Error(`[@cloudbase/extension-sms] ${smsRes.msg}`);
