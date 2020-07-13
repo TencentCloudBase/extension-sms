@@ -1,6 +1,6 @@
 {
     "name": "@cloudbase/extension-sms",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "腾讯云云开发短信登录扩展",
     "main": "built/index.js",
     "scripts": {
